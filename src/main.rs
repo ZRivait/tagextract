@@ -4,7 +4,50 @@ use metaflac::Tag;
 
 fn main() {
 
-    let args: Vec<String> = env::args().collect();
+    let mut args = env::args();
+
+    // skips the executable argument
+    args.next();
+    
+    // gets the operation argument
+    let insert = match args.next() {
+
+        Some(op) => 
+            match op.as_str() {
+            
+                "i" => true,
+                "x" => false,
+                _ => panic!("incorrect operation"),
+            }
+        None => panic!("no operation given"),
+
+    };
+
+    let mut format = String::new();
+    
+    // process the other arguments
+    for arg in args {
+
+        if arg.starts_with('-') {
+            match arg.as_str() {
+
+                "-o" | "--out" => (),
+                _ => (),
+
+            }
+        }
+        else {
+
+            format = arg.clone();
+
+        }
+    }
+
+    if format.is_empty() {
+
+        panic!("no format specifier given");
+
+    }
 
     let pwd = match env::current_dir() {
 
@@ -15,6 +58,7 @@ fn main() {
 
     println!("pwd:{:?}", pwd);
 
+    /*
     let flacs = get_flacs_sorted(pwd);
     let mut tags = Vec::new();
 
@@ -30,6 +74,9 @@ fn main() {
         tags.push(tag);
 
     }
+    */
+
+
 
 }
 
