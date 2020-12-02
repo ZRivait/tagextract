@@ -1,6 +1,7 @@
 use std::{fs, env};
 use std::path::{Path, PathBuf};
 use metaflac::Tag;
+use regex::Regex;
 
 fn main() {
 
@@ -46,6 +47,14 @@ fn main() {
     if format.is_empty() {
 
         panic!("no format specifier given");
+
+    }
+
+    let captured_tags = format_checker(&format);
+
+    for tag in captured_tags.iter() {
+
+        println!("{}", tag);
 
     }
 
@@ -119,4 +128,25 @@ fn get_flacs_sorted(pwd: PathBuf) -> Vec<PathBuf> {
     flacs.sort();
 
     flacs
+}
+
+// pulls the tags out of the format string
+fn format_checker(format: &str) -> Vec<String> {
+
+    let tag = Regex::new(r"%(?P<tag>[a-zA-Z]+)%").unwrap();
+    let mut captured_tags = Vec::new();
+
+    for caps in tag.captures_iter(format) {
+
+        match &caps["tag"] {
+
+            "artist" | "title" | "album" | "albumartist" | "track" | "disc" | "genre" | "year" | "comment" => captured_tags.push(String::from(&caps["tag"])),
+            _ => (),
+
+        }
+
+    }
+
+    captured_tags
+
 }
