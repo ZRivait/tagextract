@@ -67,7 +67,7 @@ fn main() {
 
     println!("pwd:{:?}", pwd);
 
-    /*
+    
     let flacs = get_flacs_sorted(pwd);
     let mut tags = Vec::new();
 
@@ -83,8 +83,9 @@ fn main() {
         tags.push(tag);
 
     }
-    */
+    
 
+    
 
 
 }
