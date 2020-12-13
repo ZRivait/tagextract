@@ -70,6 +70,13 @@ fn main() {
 
     println!("pwd:{:?}", pwd);
 
+    match insert {
+
+        false => write_tags_to_file(pwd, &format),
+        true => read_tags_from_file(&format),
+
+    };
+
 }
 
 // gets the flacs in the given directory
@@ -167,18 +174,19 @@ fn get_format_tags(format: &str) -> Vec<String> {
 // writes the tags to a file based on the given format specifier
 // tags: the tags of the flac files to write
 // format: the format specifier to base the output on
-fn write_tags_to_file(tags: Vec<Tag>, format: &str) {
+fn write_tags_to_file(pwd: PathBuf, format: &str) {
 
 
     let file = OpenOptions::new()
         .write(true)
-        .create_new(true)
+        .truncate(true)
         .open("tags.txt")
         .unwrap();
 
     let mut writer = BufWriter::new(file);
 
     let captured_tags = get_format_tags(&format);
+    let tags = get_flac_tags(pwd);
 
     // gets the vorbis comment from each tag
     // reads the tags and then builds the output string based on the format specifier
@@ -196,6 +204,7 @@ fn write_tags_to_file(tags: Vec<Tag>, format: &str) {
         }
 
         writer.write_all(format_output.as_bytes());
+        writer.write(b"\n");
 
     }
 
@@ -253,13 +262,14 @@ fn read_tags_from_file(format: &str) {
     let reader = BufReader::new(file);
 
     let captured_tags = get_format_tags(&format);
+    let input_format = build_input_specifier(&format);
 
     // applies the built input format specifier to read the lines in the tags file
     for line in reader.lines() {
 
         let text = line.unwrap();
         println!("{}", text);
-        let re = Regex::new(format).unwrap();
+        let re = Regex::new(&input_format).unwrap();
 
         let caps = re.captures(&text).unwrap();
 
