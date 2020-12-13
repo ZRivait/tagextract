@@ -1,7 +1,10 @@
 use std::{fs, env};
 use std::path::{Path, PathBuf};
+use std::fs::OpenOptions;
+use std::io::{BufReader, BufRead, BufWriter, Write};
 use metaflac::Tag;
 use regex::Regex;
+use regex::Captures;
 
 fn main() {
 
@@ -67,44 +70,6 @@ fn main() {
 
     println!("pwd:{:?}", pwd);
 
-    let flacs = get_flacs_sorted(pwd);
-    let mut tags = Vec::new();
-
-    // gets the Tag structs for each flac found
-    for flac in flacs {
-
-        let tag = match Tag::read_from_path(flac) {
-
-            Ok(x) => x,
-            Err(_) => panic!("error reading flac"),
-
-        };
-
-        tags.push(tag);
-
-    }
-    
-    for tag in tags {
-
-        let vorbis = tag.vorbis_comments().unwrap();
-        let mut format_output = format.clone();
-
-        for key in &captured_tags {
-
-            let val = vorbis.get(&key.to_uppercase()).unwrap();
-            let re = Regex::new(format!("%{}%", key).as_str()).unwrap();
-            format_output = re.replace(&format_output, val[0].as_str()).to_string();
-
-            
-
-        }
-
-        println!("{}", format_output);
-
-    }
-    
-
-
 }
 
 // gets the flacs in the given directory
@@ -148,6 +113,30 @@ fn get_flacs_sorted(pwd: PathBuf) -> Vec<PathBuf> {
     flacs
 }
 
+fn get_flac_tags(pwd: PathBuf) -> Vec<Tag> {
+
+    let flacs = get_flacs_sorted(pwd);
+    let mut tags = Vec::new();
+
+    // gets the Tag structs for each flac found
+    for flac in flacs {
+
+        let tag = match Tag::read_from_path(flac) {
+
+            Ok(x) => x,
+            Err(_) => panic!("error reading flac"),
+
+        };
+
+        tags.push(tag);
+
+    }
+
+    tags
+
+}
+
+
 // pulls the tags out of the format string
 fn get_format_tags(format: &str) -> Vec<String> {
 
@@ -168,3 +157,98 @@ fn get_format_tags(format: &str) -> Vec<String> {
     captured_tags
 
 }
+
+fn write_tags_to_file(tags: Vec<Tag>, captured_tags: Vec<String>, format: &str) {
+
+
+    let file = OpenOptions::new()
+        .write(true)
+        .create_new(true)
+        .open("tags.txt")
+        .unwrap();
+
+    let mut writer = BufWriter::new(file);
+
+    // gets the vorbis comment from each tag
+    // reads the tags and then builds the output string based on the format specifier
+    for tag in tags {
+
+        let vorbis = tag.vorbis_comments().unwrap();
+        let mut format_output = format.to_string();
+
+        for key in &captured_tags {
+
+            let val = vorbis.get(&key.to_uppercase()).unwrap();
+            let re = Regex::new(format!("%{}%", key).as_str()).unwrap();
+            format_output = re.replace(&format_output, val[0].as_str()).to_string();
+
+        }
+
+        writer.write_all(format_output.as_bytes());
+
+    }
+
+    writer.flush().unwrap();
+
+}
+
+fn build_input_specifier(captured_tags: Vec<String>, format: &str)  -> String {
+
+    let mut format_input = format.to_string();
+
+    // builds the input format specifier
+    // replaces the tags in the input string with regex expressions
+    for key in &captured_tags {
+    
+        let re = Regex::new(format!("%{}%", key).as_str()).unwrap();
+        format_input = re.replace(&format_input, |cap: &Captures| {
+
+            match &cap[0] {
+
+                "%artist%" => r"(?P<artist>.+)", 
+                "%title%" => r"(?P<title>.+)", 
+                "%album%" => r"(?P<album>.+)", 
+                "%albumartist%" => r"(?P<albumartist>.+)", 
+                "%track%" => r"(?P<track>.+)", 
+                "%disc%" => r"(?P<disc>.+)", 
+                "%genre%" => r"(?P<genre>.+)", 
+                "%year%" => r"(?P<year>.+)",
+                "%comment%" => r"(?P<comment>.+)",
+                _ => "",
+
+            }
+
+        }).to_string();
+    }
+
+    format_input
+
+}
+
+fn read_tags_from_file(captured_tags: Vec<String>, format: &str) {
+
+    let file = OpenOptions::new()
+        .read(true)
+        .open("tags.txt")
+        .unwrap();
+
+    let reader = BufReader::new(file);
+
+    // applies the built input format specifier to read the lines in the tags file
+    for line in reader.lines() {
+
+        let text = line.unwrap();
+        println!("{}", text);
+        let re = Regex::new(format).unwrap();
+
+        let caps = re.captures(&text).unwrap();
+
+        for key in &captured_tags {
+
+            println!("{} : {}", key, caps.name(&key).unwrap().as_str());
+
+        }
+
+    }                            
+}
+
