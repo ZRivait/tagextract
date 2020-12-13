@@ -50,7 +50,7 @@ fn main() {
 
     }
 
-    let captured_tags = format_checker(&format);
+    let captured_tags = get_format_tags(&format);
 
     for tag in captured_tags.iter() {
 
@@ -67,10 +67,10 @@ fn main() {
 
     println!("pwd:{:?}", pwd);
 
-    
     let flacs = get_flacs_sorted(pwd);
     let mut tags = Vec::new();
 
+    // gets the Tag structs for each flac found
     for flac in flacs {
 
         let tag = match Tag::read_from_path(flac) {
@@ -84,7 +84,24 @@ fn main() {
 
     }
     
+    for tag in tags {
 
+        let vorbis = tag.vorbis_comments().unwrap();
+        let mut format_output = format.clone();
+
+        for key in &captured_tags {
+
+            let val = vorbis.get(&key.to_uppercase()).unwrap();
+            let re = Regex::new(format!("%{}%", key).as_str()).unwrap();
+            format_output = re.replace(&format_output, val[0].as_str()).to_string();
+
+            
+
+        }
+
+        println!("{}", format_output);
+
+    }
     
 
 
@@ -132,7 +149,7 @@ fn get_flacs_sorted(pwd: PathBuf) -> Vec<PathBuf> {
 }
 
 // pulls the tags out of the format string
-fn format_checker(format: &str) -> Vec<String> {
+fn get_format_tags(format: &str) -> Vec<String> {
 
     let tag = Regex::new(r"%(?P<tag>[a-zA-Z]+)%").unwrap();
     let mut captured_tags = Vec::new();
