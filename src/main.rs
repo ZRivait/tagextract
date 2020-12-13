@@ -219,7 +219,8 @@ fn write_tags_to_file(pwd: PathBuf, format: &str) {
 fn build_input_specifier(format: &str)  -> String {
 
     let captured_tags = get_format_tags(&format);
-    let mut format_input = format.to_string();
+    // adds the beginning and ending anchors
+    let mut format_input = format!("^{}$", format);
 
     // builds the input format specifier
     // replaces the tags in the input string with regex expressions
