@@ -180,6 +180,7 @@ fn write_tags_to_file(pwd: PathBuf, format: &str) {
     let file = OpenOptions::new()
         .write(true)
         .truncate(true)
+        .create(true)
         .open("tags.txt")
         .unwrap();
 
