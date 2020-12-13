@@ -166,9 +166,8 @@ fn get_format_tags(format: &str) -> Vec<String> {
 
 // writes the tags to a file based on the given format specifier
 // tags: the tags of the flac files to write
-// captured_tags: the captured tags in order
 // format: the format specifier to base the output on
-fn write_tags_to_file(tags: Vec<Tag>, captured_tags: Vec<String>, format: &str) {
+fn write_tags_to_file(tags: Vec<Tag>, format: &str) {
 
 
     let file = OpenOptions::new()
@@ -178,6 +177,8 @@ fn write_tags_to_file(tags: Vec<Tag>, captured_tags: Vec<String>, format: &str) 
         .unwrap();
 
     let mut writer = BufWriter::new(file);
+
+    let captured_tags = get_format_tags(&format);
 
     // gets the vorbis comment from each tag
     // reads the tags and then builds the output string based on the format specifier
@@ -204,11 +205,11 @@ fn write_tags_to_file(tags: Vec<Tag>, captured_tags: Vec<String>, format: &str) 
 
 // builds the input format specifier out of regex capture groups
 // checks the captured tags and replaces them in the format specifier
-// captured_tags: the captured tags in the format specifier
 // format: the format specifier
 // returns the new regex filed format specifier as a string
-fn build_input_specifier(captured_tags: Vec<String>, format: &str)  -> String {
+fn build_input_specifier(format: &str)  -> String {
 
+    let captured_tags = get_format_tags(&format);
     let mut format_input = format.to_string();
 
     // builds the input format specifier
@@ -241,9 +242,8 @@ fn build_input_specifier(captured_tags: Vec<String>, format: &str)  -> String {
 }
 
 // reads and seperates all the tags out of the file
-// captured_tags: the captured tags in the format specifier
 // format: the format specifier
-fn read_tags_from_file(captured_tags: Vec<String>, format: &str) {
+fn read_tags_from_file(format: &str) {
 
     let file = OpenOptions::new()
         .read(true)
@@ -251,6 +251,8 @@ fn read_tags_from_file(captured_tags: Vec<String>, format: &str) {
         .unwrap();
 
     let reader = BufReader::new(file);
+
+    let captured_tags = get_format_tags(&format);
 
     // applies the built input format specifier to read the lines in the tags file
     for line in reader.lines() {
