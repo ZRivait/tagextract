@@ -81,12 +81,7 @@ pub fn get_format_tags(format: &str) -> Vec<String> {
 
     for caps in tag.captures_iter(format) {
 
-        match &caps["tag"] {
-
-            "artist" | "title" | "album" | "albumartist" | "track" | "disc" | "genre" | "year" | "comment" => captured_tags.push(String::from(&caps["tag"])),
-            _ => (),
-
-        }
+        captured_tags.push(String::from(&caps["tag"])),
 
     }
 

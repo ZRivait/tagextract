@@ -11,29 +11,16 @@ fn build_input_specifier(format: &str)  -> String {
 
     let captured_tags = common::get_format_tags(&format);
     // adds the beginning and ending anchors
-    let mut format_input = format!("^{}$", format);
+    let mut format_input = format!("{}", format);
 
     // builds the input format specifier
     // replaces the tags in the input string with regex expressions
     for key in &captured_tags {
     
-        let re = Regex::new(format!("%{}%", key).as_str()).unwrap();
+        let re = Regex::new(format!(r"%(?P<tag>{})%", key).as_str()).unwrap();
         format_input = re.replace(&format_input, |cap: &Captures| {
 
-            match &cap[0] {
-
-                "%artist%" => r"(?P<artist>.+)", 
-                "%title%" => r"(?P<title>.+)", 
-                "%album%" => r"(?P<album>.+)", 
-                "%albumartist%" => r"(?P<albumartist>.+)", 
-                "%track%" => r"(?P<track>.+)", 
-                "%disc%" => r"(?P<disc>.+)", 
-                "%genre%" => r"(?P<genre>.+)", 
-                "%year%" => r"(?P<year>.+)",
-                "%comment%" => r"(?P<comment>.+)",
-                _ => "",
-
-            }
+            format!(r"(?P<{}>.+)", &cap["tag"])
 
         }).to_string();
     }
