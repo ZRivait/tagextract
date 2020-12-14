@@ -6,7 +6,7 @@ Usage:
 tagextract x [options] [format]
 tagextract i [options] [format]
 
-[format] is the format specifier. It uses % delimited tags given as a string. For x operations it affects the output and for i operations it affects the inserted tags.
+[format] is the format specifier. It uses % delimited tags given as a string. Each tag must be delimited by a character from the next tag. For x operations it affects the output and for i operations it affects the inserted tags.
 
 Examples:
 %number%. %title%
@@ -18,11 +18,13 @@ artist
 title
 album
 albumartist
-number
-disc
+tracknumber
+discnumber
 genre
-year
+date
 comment
+
+Pass the --unsupported-tags option to use any tag you want
 
 Options:
 
