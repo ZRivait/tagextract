@@ -120,5 +120,4 @@ pub fn sanitize_for_regex(string: &str) -> String {
 
     meta_re.replace_all(string, r"\$meta").to_string()
 
-
 }

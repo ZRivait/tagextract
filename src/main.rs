@@ -77,7 +77,7 @@ fn main() {
     match insert {
 
         false => extract::write_tags_to_file(pwd, &format),
-        true => insert::read_tags_from_file(&format),
+        true => insert::write_tags_to_flacs(pwd, &format),
 
     };
 

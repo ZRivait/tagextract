@@ -1,5 +1,6 @@
 use std::fs::OpenOptions;
 use std::io::{BufReader, BufRead};
+use std::path::PathBuf;
 use regex::{Regex, Captures};
 use crate::common;
 
@@ -30,9 +31,9 @@ fn build_input_specifier(format: &str)  -> String {
 
 }
 
-// reads and seperates all the tags out of the file
-// format: the format specifier
-pub fn read_tags_from_file(format: &str) {
+// reads the tags from the text file and puts the line in a vector
+// returns a vector of the line in the file
+pub fn read_tags_from_file() -> Vec<String> {
 
     let file = OpenOptions::new()
         .read(true)
@@ -41,23 +42,42 @@ pub fn read_tags_from_file(format: &str) {
 
     let reader = BufReader::new(file);
 
-    let captured_tags = common::get_format_tags(&format);
-    let input_format = build_input_specifier(&format);
+    let mut lines = Vec::new();
 
     // applies the built input format specifier to read the lines in the tags file
     for line in reader.lines() {
 
-        let text = line.unwrap();
-        println!("{}", text);
+        lines.push(line.unwrap());
+
+    }           
+
+    lines
+
+}
+
+pub fn write_tags_to_flacs(pwd: PathBuf, format: &str) {
+
+    let captured_tags = common::get_format_tags(&format);
+    let input_format = build_input_specifier(&format);
+
+    let lines = read_tags_from_file();
+    let mut tags = common::get_flac_tags(pwd);
+
+    for (line, mut tag) in lines.iter().zip(tags.iter_mut()) {
+
+        let mut vorbis = tag.vorbis_comments_mut();
+
         let re = Regex::new(&input_format).unwrap();
 
-        let caps = re.captures(&text).unwrap();
+        let caps = re.captures(&line).unwrap();
 
         for key in &captured_tags {
 
-            println!("{} : {}", key, caps.name(&key).unwrap().as_str());
+            vorbis.set(key.to_uppercase(), vec![caps.name(&key).unwrap().as_str()]);
 
         }
 
+        tag.save();
     }                            
+
 }
