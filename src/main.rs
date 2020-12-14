@@ -51,6 +51,12 @@ fn main() {
 
     }
 
+    if !common::is_supported_tags(&format) {
+
+        panic!("using unsupported tags");
+
+    }
+
     let captured_tags = common::get_format_tags(&format);
 
     for tag in captured_tags.iter() {

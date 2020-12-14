@@ -81,10 +81,32 @@ pub fn get_format_tags(format: &str) -> Vec<String> {
 
     for caps in tag.captures_iter(format) {
 
-        captured_tags.push(String::from(&caps["tag"])),
+        captured_tags.push(String::from(&caps["tag"]));
 
     }
 
     captured_tags
+
+}
+
+// checks if the tags in the format string are in the supported list
+// format: the format string with the tags
+// returns a bool if its false or not
+pub fn is_supported_tags(format: &str) -> bool {
+
+    let tag = Regex::new(r"%(?P<tag>[a-zA-Z]+)%").unwrap();
+
+    for caps in tag.captures_iter(format) {
+
+        match &caps["tag"] {
+
+                "artist" | "title" | "album" | "albumartist" | "tracknumber" | "discnumber" | "genre" | "date" | "comment" => (),
+                _ => return false,
+
+        }
+
+    }
+
+    true
 
 }
