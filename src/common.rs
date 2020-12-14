@@ -76,10 +76,10 @@ pub fn get_flac_tags(pwd: PathBuf) -> Vec<Tag> {
 // returns the captured tags as a vector of strings
 pub fn get_format_tags(format: &str) -> Vec<String> {
 
-    let tag = Regex::new(r"%(?P<tag>[a-zA-Z]+)%").unwrap();
+    let tag_re = Regex::new(r"%(?P<tag>[a-zA-Z]+)%").unwrap();
     let mut captured_tags = Vec::new();
 
-    for caps in tag.captures_iter(format) {
+    for caps in tag_re.captures_iter(format) {
 
         captured_tags.push(String::from(&caps["tag"]));
 
@@ -94,9 +94,9 @@ pub fn get_format_tags(format: &str) -> Vec<String> {
 // returns a bool if its false or not
 pub fn is_supported_tags(format: &str) -> bool {
 
-    let tag = Regex::new(r"%(?P<tag>[a-zA-Z]+)%").unwrap();
+    let tag_re = Regex::new(r"%(?P<tag>[a-zA-Z]+)%").unwrap();
 
-    for caps in tag.captures_iter(format) {
+    for caps in tag_re.captures_iter(format) {
 
         match &caps["tag"] {
 
@@ -108,5 +108,17 @@ pub fn is_supported_tags(format: &str) -> bool {
     }
 
     true
+
+}
+
+// sanitizes a string for use in regex expressions by escaping metacharacters
+// string: the string to be sanitized
+// Returns a copy of the string post-sanitization
+pub fn sanitize_for_regex(string: &str) -> String {
+
+    let meta_re = Regex::new(r"(?P<meta>[\\\.\+\*\?\(\)\|\{\}\[\]\^\$])").unwrap();
+
+    meta_re.replace_all(string, r"\$meta").to_string()
+
 
 }

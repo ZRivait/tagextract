@@ -11,7 +11,8 @@ fn build_input_specifier(format: &str)  -> String {
 
     let captured_tags = common::get_format_tags(&format);
     // adds the beginning and ending anchors
-    let mut format_input = format!("{}", format);
+    let mut format_input = format!("^{}$", format);
+    format_input = common::sanitize_for_regex(&format);
 
     // builds the input format specifier
     // replaces the tags in the input string with regex expressions
