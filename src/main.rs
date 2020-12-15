@@ -45,12 +45,14 @@ fn main() {
         }
     }
 
+    // panics if no format specifier is given
     if format.is_empty() {
 
         panic!("no format specifier given");
 
     }
 
+    // panics if given unsupported tags
     if !common::is_supported_tags(&format) {
 
         panic!("using unsupported tags");
@@ -77,7 +79,7 @@ fn main() {
     match insert {
 
         false => extract::write_tags_to_file(pwd, &format),
-        true => insert::write_tags_to_flacs(pwd, &format),
+        true => insert::run_changes(pwd, &format),
 
     };
 
