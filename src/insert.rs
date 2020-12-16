@@ -60,7 +60,7 @@ impl Changes {
             };
 
             if old_value != value {
-                change_lines.push_str(&format!("old: {}, new: {}\n", old_value, value));
+                change_lines.push_str(&format!("field: {}, old: {}, new: {}\n", field, old_value, value));
             }
 
         }
