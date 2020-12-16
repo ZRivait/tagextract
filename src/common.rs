@@ -1,7 +1,48 @@
-use std::fs;
+use std::{error::Error, convert::From, fmt, fs, io};
 use std::path::PathBuf;
-use metaflac::Tag;
+use metaflac::{Tag};
 use regex::Regex;
+
+#[derive(Debug)]
+pub enum TagError {
+
+    IoError(String),
+    MetaflacError(String),
+
+}
+
+impl Error for TagError {}
+
+impl fmt::Display for TagError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+
+            TagError::IoError(desc) => write!(f, "{}", desc),
+            TagError::MetaflacError(desc) => write!(f, "{}", desc),
+
+        }
+    }
+}
+
+impl From<io::Error> for TagError {
+
+    fn from(err: io::Error) -> TagError {
+
+        TagError::IoError(String::from("an io error"))
+
+    }
+
+}
+
+impl From<metaflac::Error> for TagError {
+
+    fn from(err: metaflac::Error) -> TagError {
+
+        TagError::MetaflacError(String::from(err.description))
+
+    }
+
+}
 
 // gets the flacs in the given directory
 // pwd: the path to check for flac files
