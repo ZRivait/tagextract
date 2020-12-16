@@ -63,6 +63,30 @@ impl Changes {
 
     }
 
+    fn make_changes(&mut self) {
+
+        let tag_struct = Tag::read_from_path(&self.path_to_file).unwrap();
+
+        for (field, value) in self.fields.iter().zip(self.values.iter()) {
+
+            let mut vorbis = tag_struct.vorbis_comments_mut().unwrap();
+            let old_value = match vorbis.get(&field) {
+
+                Some(val) => val[0].as_str(),
+                None => "none",
+
+            };
+
+            if old_value != value {
+                vorbis.set(field, vec![value]);
+            }
+
+        }
+
+        tag_struct.save();
+
+    }
+
 }
 
 // builds the input format specifier out of regex capture groups
@@ -151,13 +175,25 @@ pub fn create_changes(pwd: PathBuf, format: &str) -> Vec<Changes> {
 
 }
 
-pub fn run_changes(pwd: PathBuf, format: &str) {
+pub fn print_changes(pwd: PathBuf, format: &str) {
 
     let changes = create_changes(pwd, format);
 
     for change in changes {
 
         change.print_changes();
+
+    }
+
+}
+
+pub fn make_changes(pwd: PathBuf, format: &str) {
+
+    let changes = create_changes(pwd, format);
+
+    for change in changes {
+
+        change.make_changes();
 
     }
 
