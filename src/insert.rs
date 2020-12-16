@@ -5,6 +5,9 @@ use metaflac::Tag;
 use regex::{Regex, Captures};
 use crate::common;
 
+// holds a series of metadata changes to be made to a music file
+// currently only support flac files but support may be expanded later
+// each change is held in synchronized vectors as a pair of strings
 pub struct Changes {
 
     path_to_file: PathBuf,
@@ -15,6 +18,9 @@ pub struct Changes {
 
 impl Changes {
 
+    // creates a new Changes struct
+    // path_to_file: the path to the file the changes are meant for
+    // returns the new changes file
     fn new(path_to_file: PathBuf) -> Changes {
 
         Changes {
@@ -25,6 +31,9 @@ impl Changes {
 
     }
 
+    // adds a new change to the struct
+    // field: the metadata field to be changed
+    // value: the new value of the field
     fn add_change(&mut self, field: &str, value: &str) {
 
         self.fields.push(String::from(field));
@@ -32,6 +41,8 @@ impl Changes {
 
     }
 
+    // prints the changes in a human readable way
+    // only prints changes that actually change something
     fn print_changes(&self) {
 
         let mut change_lines = String::new();
@@ -63,13 +74,14 @@ impl Changes {
 
     }
 
+    // makes the changes to the metadata the saves them
     fn make_changes(&mut self) {
 
         let tag_struct = Tag::read_from_path(&self.path_to_file).unwrap();
 
         for (field, value) in self.fields.iter().zip(self.values.iter()) {
 
-            let mut vorbis = tag_struct.vorbis_comments_mut().unwrap();
+            let mut vorbis = tag_struct.vorbis_comments_mut();
             let old_value = match vorbis.get(&field) {
 
                 Some(val) => val[0].as_str(),
@@ -140,6 +152,10 @@ pub fn read_lines_from_file() -> Vec<String> {
 
 }
 
+// creates a list of Changes that are to be made
+// pwd: the path to the directory the files to be changed are in
+// format: the format specifier the changes are based on
+// returns a vector of the new Changes
 pub fn create_changes(pwd: PathBuf, format: &str) -> Vec<Changes> {
 
     let captured_tags = common::get_format_tags(&format);
@@ -175,6 +191,9 @@ pub fn create_changes(pwd: PathBuf, format: &str) -> Vec<Changes> {
 
 }
 
+// creates then prints the changes
+// pwd: the path to the directory the files to be changed are in
+// format: the format specifier the changes are based on
 pub fn print_changes(pwd: PathBuf, format: &str) {
 
     let changes = create_changes(pwd, format);
@@ -187,6 +206,9 @@ pub fn print_changes(pwd: PathBuf, format: &str) {
 
 }
 
+// creates then makes the changes
+// pwd: the path to the directory the files to be changed are in
+// format: the format specifier the changes are based on
 pub fn make_changes(pwd: PathBuf, format: &str) {
 
     let changes = create_changes(pwd, format);
