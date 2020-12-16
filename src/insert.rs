@@ -60,7 +60,12 @@ impl Changes {
             };
 
             if old_value != value {
-                change_lines.push_str(&format!("field: {}, old: {}, new: {}\n", field, old_value, value));
+                if value.as_str() != "none" {
+                    change_lines.push_str(&format!("field: {}, old: {}, new: {}\n", field, old_value, value));
+                }
+                else {
+                    change_lines.push_str(&format!("removing field: {}, old value: {}\n", field, old_value));
+                }
             }
 
         }
@@ -92,7 +97,12 @@ impl Changes {
             };
 
             if old_value != value {
-                vorbis.set(field, vec![value]);
+                if value.as_str() != "none" {
+                    vorbis.set(field, vec![value]);
+                }
+                else {
+                    vorbis.remove(field);
+                }
             }
 
         }
