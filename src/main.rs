@@ -1,4 +1,5 @@
 use std::env;
+use std::process;
 
 mod common;
 mod extract;
@@ -15,7 +16,12 @@ fn main() {
     let operation = match args.next() {
 
         Some(operation) => operation, 
-        None => panic!("no operation given"),
+        None => {
+
+            println!("No operation given. Exiting");
+            process::exit(1);
+
+        }
 
     };
 
@@ -42,45 +48,60 @@ fn main() {
     // panics if no format specifier is given
     if format.is_empty() {
 
-        panic!("no format specifier given");
+        println!("No format specifier given. Exiting");
+        process::exit(1);
 
     }
 
     // panics if given unsupported tags
     if !common::is_supported_tags(&format) {
 
-        panic!("using unsupported tags");
+        println!("Unsupported tags found in format specifier. Please pass the --unsupported-tags option. Exiting");
+        process::exit(1);
 
     }
-
-    let captured_tags = common::get_format_tags(&format);
-
-    /*
-    for tag in captured_tags.iter() {
-
-        println!("{}", tag);
-
-    }
-    */
 
     let pwd = match env::current_dir() {
 
         Ok(x) => x,
-        Err(_) => panic!("could not get working directory"),
+        Err(_) => {
+            println!("Could not get pwd. Exiting");
+            process::exit(1);
+        }
 
     };
 
-    //println!("pwd:{:?}", pwd);
+    let result = match operation.as_str() {
 
-    match operation.as_str() {
+         "extract" => {
+            extract::write_tags_to_file(pwd, &format)
+         }
 
-         "extract" => extract::write_tags_to_file(pwd, &format),
-         "insert" => insert::make_changes(pwd, &format),
-         "print" => insert::print_changes(pwd, &format),
-         _ => panic!("invalid operation"),
+         "insert" => {
+            insert::make_changes(pwd, &format)
+         }
+
+         "print" => {
+            insert::print_changes(pwd, &format)
+         }
+
+         _ => {
+            println!("Invalid operation. Exiting");
+            process::exit(1);
+         }
 
     };
 
+    match result {
+
+        Ok(_) => println!("Operation complete"),
+        Err(err) => {
+            match err {
+                common::TagError::IoError(_) => println!("Error: {}", err),
+                common::TagError::MetaflacError(_) => println!("Error: {}", err),
+            }
+        }
+    }
 }
 
 
