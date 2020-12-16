@@ -1,7 +1,7 @@
 use std::fs::OpenOptions;
 use std::io::{BufReader, BufRead};
 use std::path::PathBuf;
-use metaflac::Tag;
+use metaflac::{Tag};
 use regex::{Regex, Captures};
 use crate::common;
 
@@ -43,11 +43,11 @@ impl Changes {
 
     // prints the changes in a human readable way
     // only prints changes that actually change something
-    fn print_changes(&self) {
+    fn print_changes(&self) -> Result<(), common::TagError> {
 
         let mut change_lines = String::new();
 
-        let tag_struct = Tag::read_from_path(&self.path_to_file).unwrap();
+        let tag_struct = Tag::read_from_path(&self.path_to_file)?;
 
         for (field, value) in self.fields.iter().zip(self.values.iter()) {
 
@@ -71,17 +71,19 @@ impl Changes {
             print!("{}", change_lines);
 
         }
+        
+        Ok(())
 
     }
 
     // makes the changes to the metadata the saves them
-    fn make_changes(&mut self) {
+    fn make_changes(&mut self) -> Result<(), common::TagError> {
 
-        let mut tag_struct = Tag::read_from_path(&self.path_to_file).unwrap();
+        let mut tag_struct = Tag::read_from_path(&self.path_to_file)?;
 
         for (field, value) in self.fields.iter().zip(self.values.iter()) {
 
-            let mut vorbis = tag_struct.vorbis_comments_mut();
+            let vorbis = tag_struct.vorbis_comments_mut();
             let old_value = match vorbis.get(&field) {
 
                 Some(val) => val[0].as_str(),
@@ -95,7 +97,9 @@ impl Changes {
 
         }
 
-        tag_struct.save();
+        tag_struct.save()?;
+
+        Ok(())
 
     }
 
@@ -109,22 +113,22 @@ impl Changes {
 fn build_input_specifier(format: &str, captured_tags: &Vec<String>)  -> String {
 
     // adds the beginning and ending anchors
-    let mut format_input = format!("^{}$", format);
-    format_input = common::sanitize_for_regex(&format);
+    let mut input_format = format!("^{}$", format);
+    input_format = common::sanitize_for_regex(&format);
 
     // builds the input format specifier
     // replaces the tags in the input string with regex expressions
     for key in captured_tags {
     
         let re = Regex::new(format!(r"%(?P<tag>{})%", key).as_str()).unwrap();
-        format_input = re.replace(&format_input, |cap: &Captures| {
+        input_format = re.replace(&input_format, |cap: &Captures| {
 
             format!(r"(?P<{}>.+)", &cap["tag"])
 
         }).to_string();
     }
 
-    format_input
+    input_format
 
 }
 
@@ -168,12 +172,12 @@ pub fn create_changes(pwd: PathBuf, format: &str) -> Vec<Changes> {
 
     for tag in tags {
 
-        let mut change = Changes::new(tag);
+        let change = Changes::new(tag);
         changes.push(change);
 
     }
 
-    for (line, mut change) in lines.iter().zip(changes.iter_mut()) {
+    for (line, change) in lines.iter().zip(changes.iter_mut()) {
 
         let re = Regex::new(&input_format).unwrap();
 
@@ -194,29 +198,33 @@ pub fn create_changes(pwd: PathBuf, format: &str) -> Vec<Changes> {
 // creates then prints the changes
 // pwd: the path to the directory the files to be changed are in
 // format: the format specifier the changes are based on
-pub fn print_changes(pwd: PathBuf, format: &str) {
+pub fn print_changes(pwd: PathBuf, format: &str) -> Result<(), common::TagError> {
 
     let changes = create_changes(pwd, format);
 
     for change in changes {
 
-        change.print_changes();
+        change.print_changes()?;
 
     }
+
+    Ok(())
 
 }
 
 // creates then makes the changes
 // pwd: the path to the directory the files to be changed are in
 // format: the format specifier the changes are based on
-pub fn make_changes(pwd: PathBuf, format: &str) {
+pub fn make_changes(pwd: PathBuf, format: &str) -> Result<(), common::TagError> {
 
     let changes = create_changes(pwd, format);
 
     for mut change in changes {
 
-        change.make_changes();
+        change.make_changes()?;
 
     }
+
+    Ok(())
 
 }
