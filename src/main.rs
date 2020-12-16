@@ -12,15 +12,9 @@ fn main() {
     args.next();
     
     // gets the operation argument
-    let insert = match args.next() {
+    let operation = match args.next() {
 
-        Some(op) => 
-            match op.as_str() {
-            
-                "i" => true,
-                "x" => false,
-                _ => panic!("incorrect operation"),
-            }
+        Some(operation) => operation, 
         None => panic!("no operation given"),
 
     };
@@ -61,11 +55,13 @@ fn main() {
 
     let captured_tags = common::get_format_tags(&format);
 
+    /*
     for tag in captured_tags.iter() {
 
         println!("{}", tag);
 
     }
+    */
 
     let pwd = match env::current_dir() {
 
@@ -74,12 +70,14 @@ fn main() {
 
     };
 
-    println!("pwd:{:?}", pwd);
+    //println!("pwd:{:?}", pwd);
 
-    match insert {
+    match operation.as_str() {
 
-        false => extract::write_tags_to_file(pwd, &format),
-        true => insert::run_changes(pwd, &format),
+         "extract" => extract::write_tags_to_file(pwd, &format),
+         "insert" => insert::make_changes(pwd, &format),
+         "print" => insert::print_changes(pwd, &format),
+         _ => panic!("invalid operation"),
 
     };
 
