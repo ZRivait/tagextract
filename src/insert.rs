@@ -77,7 +77,7 @@ impl Changes {
     // makes the changes to the metadata the saves them
     fn make_changes(&mut self) {
 
-        let tag_struct = Tag::read_from_path(&self.path_to_file).unwrap();
+        let mut tag_struct = Tag::read_from_path(&self.path_to_file).unwrap();
 
         for (field, value) in self.fields.iter().zip(self.values.iter()) {
 
@@ -213,7 +213,7 @@ pub fn make_changes(pwd: PathBuf, format: &str) {
 
     let changes = create_changes(pwd, format);
 
-    for change in changes {
+    for mut change in changes {
 
         change.make_changes();
 
