@@ -72,7 +72,7 @@ impl Changes {
 
         if !change_lines.is_empty() {
 
-            println!("Changes for {:?}", self.path_to_file);
+            println!("Changes for {:?}", self.path_to_file.file_name().unwrap());
             print!("{}", change_lines);
 
         }

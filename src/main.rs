@@ -94,7 +94,7 @@ fn main() {
 
     match result {
 
-        Ok(_) => println!("Operation complete"),
+        Ok(_) => (), 
         Err(err) => {
             match err {
                 common::TagError::IoError(_) => println!("Error: {}", err),
