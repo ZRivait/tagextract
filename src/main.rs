@@ -34,6 +34,8 @@ fn main() {
             match arg.as_str() {
 
                 "-o" | "--out" => (),
+                "-i" | "--in" => (),
+                "-u" | "--unsupported-tags" => (),
                 _ => (),
 
             }
