@@ -143,12 +143,13 @@ fn build_input_specifier(format: &str, captured_tags: &Vec<String>)  -> String {
 }
 
 // reads the tags from the text file and puts the line in a vector
+// outfile: the file to read the lines from
 // returns a vector of the line in the file
-pub fn read_lines_from_file() -> Vec<String> {
+pub fn read_lines_from_file(outfile: &str) -> Vec<String> {
 
     let file = OpenOptions::new()
         .read(true)
-        .open("tags.txt")
+        .open(outfile)
         .unwrap();
 
     let reader = BufReader::new(file);
@@ -169,13 +170,14 @@ pub fn read_lines_from_file() -> Vec<String> {
 // creates a list of Changes that are to be made
 // pwd: the path to the directory the files to be changed are in
 // format: the format specifier the changes are based on
+// outfile: the file to read the changes from
 // returns a vector of the new Changes
-pub fn create_changes(pwd: PathBuf, format: &str) -> Vec<Changes> {
+pub fn create_changes(pwd: PathBuf, format: &str, outfile: &str) -> Vec<Changes> {
 
     let captured_tags = common::get_format_tags(&format);
     let input_format = build_input_specifier(&format, &captured_tags);
 
-    let lines = read_lines_from_file();
+    let lines = read_lines_from_file(outfile);
     let tags = common::get_flacs_sorted(pwd);
 
     let mut changes: Vec<Changes> = Vec::new();
@@ -208,9 +210,10 @@ pub fn create_changes(pwd: PathBuf, format: &str) -> Vec<Changes> {
 // creates then prints the changes
 // pwd: the path to the directory the files to be changed are in
 // format: the format specifier the changes are based on
-pub fn print_changes(pwd: PathBuf, format: &str) -> Result<(), common::TagError> {
+// outfile: the file to read the changes from
+pub fn print_changes(pwd: PathBuf, format: &str, outfile: &str) -> Result<(), common::TagError> {
 
-    let changes = create_changes(pwd, format);
+    let changes = create_changes(pwd, format, outfile);
 
     for change in changes {
 
@@ -225,9 +228,10 @@ pub fn print_changes(pwd: PathBuf, format: &str) -> Result<(), common::TagError>
 // creates then makes the changes
 // pwd: the path to the directory the files to be changed are in
 // format: the format specifier the changes are based on
-pub fn make_changes(pwd: PathBuf, format: &str) -> Result<(), common::TagError> {
+// outfile: the file to read the changes from
+pub fn make_changes(pwd: PathBuf, format: &str, outfile: &str) -> Result<(), common::TagError> {
 
-    let changes = create_changes(pwd, format);
+    let changes = create_changes(pwd, format, outfile);
 
     for mut change in changes {
 

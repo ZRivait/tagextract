@@ -32,7 +32,7 @@ fn main() {
     let mut unsupported_tags = false;
 
     // process the other arguments
-    for arg in args {
+    while let Some(arg) = args.next() {
 
         if arg.starts_with('-') {
             match arg.as_str() {
@@ -92,15 +92,15 @@ fn main() {
     let result = match operation.as_str() {
 
          "extract" => {
-            extract::write_tags_to_file(pwd, &format)
+            extract::write_tags_to_file(pwd, &format, &outfile)
          }
 
          "insert" => {
-            insert::make_changes(pwd, &format)
+            insert::make_changes(pwd, &format, &outfile)
          }
 
          "print" => {
-            insert::print_changes(pwd, &format)
+            insert::print_changes(pwd, &format, &outfile)
          }
 
          _ => {

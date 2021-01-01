@@ -6,13 +6,14 @@ use crate::common;
 // writes the tags to a file based on the given format specifier
 // tags: the tags of the flac files to write
 // format: the format specifier to base the output on
-pub fn write_tags_to_file(pwd: PathBuf, format: &str) -> Result<(), common::TagError> {
+// outfile: the file to print the tags to 
+pub fn write_tags_to_file(pwd: PathBuf, format: &str, outfile: &str) -> Result<(), common::TagError> {
 
     let file = OpenOptions::new()
         .write(true)
         .truncate(true)
         .create(true)
-        .open("tags.txt")?;
+        .open(outfile)?;
 
     let mut writer = BufWriter::new(file);
 
