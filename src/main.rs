@@ -49,7 +49,7 @@ fn main() {
                     }
                 }
                 "-i" | "--in" => (),
-                "-u" | "--unsupported-tags" => (),
+                "-u" | "--unsupported-tags" => unsupported_tags = true,
                 _ => (),
 
             }
